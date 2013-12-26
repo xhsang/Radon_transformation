@@ -1,0 +1,1 @@
+2 /* CREATEPROCESS_MANIFEST_RESOURCE_ID */ 24 /* RT_MANIFEST */ "E:/Dev/builds/frtw-v1.50-x86/lib/frtw.dll.embed.manifest"
