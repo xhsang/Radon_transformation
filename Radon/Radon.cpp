@@ -6,6 +6,34 @@
 #include "windows.h"
 
 #define MSIZE 512
+#define MAX_LEN 100
+
+void get_data_in(float *data_in, int sizex, int sizey)
+{
+	int dx,dy;
+	char inputfilename[MAX_LEN]="F://test512.txt";
+	char line[MAX_LEN];
+	FILE* pFile = fopen(inputfilename,"r");
+
+	fgets(line, MAX_LEN, pFile);
+	sscanf(line,"%d %d",&dx,&dy);
+
+	float *d=(float*)malloc(sizeof(float)*dx*dy);
+
+	int i,j;
+	for(i=0;i<dx;i++)
+	{
+		for(j=0;j<dy;j++)
+		{
+			fgets(line, MAX_LEN, pFile);
+			sscanf(line,"%f",d+i*sizey+j);
+			if(i<sizex&&j<sizey)
+				*(data_in+i*sizey+j)=*(d+i*sizey+j);
+		}
+	}
+	fclose(pFile);
+	free(d);
+}
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -24,8 +52,13 @@ int _tmain(int argc, _TCHAR* argv[])
 	float *Icount=(float*)malloc(sizeof(float)*projsize*2);
 	float *p_data_in,*p_x,*p_y,*p_x_r,*p_y_r;
 
+	int t0=GetTickCount();
+
+	get_data_in(data_in,MSIZE,MSIZE);
+
 	count=0;
 	int t1=GetTickCount();
+	printf("time difference: %d\n",t1-t0,count);
 	p_data_in=data_in;
 	p_x=x;
 	p_y=y;
@@ -33,7 +66,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	{
 		for (j=0;j<MSIZE;j++)
 		{
-			*p_data_in=rand();
+			//*p_data_in=rand();
 			*p_x=i;
 			*p_y=j;
 			p_data_in++;
@@ -42,8 +75,10 @@ int _tmain(int argc, _TCHAR* argv[])
 		}
 	}
 	
+	char outputfilename[MAX_LEN]="F://std.txt";
+	FILE* pFile_std = fopen(outputfilename,"a");
 
-	for(k=0;k<180;k+=1)
+	for(k=0;k<180;k+=0.1)
 	{
 		float sink,cosk,dist_min;
 		int fx_r;
@@ -74,10 +109,36 @@ int _tmain(int argc, _TCHAR* argv[])
 				(*(Icount+fx_r+projsize))=(*(Icount+fx_r+projsize))+1;
 				p_x_r++;
 				p_x++;
+				p_y++;
 				p_data_in++;
 			}
 		}
+		float sum,avg, std,size;
+		sum=0;
+		size=0;
+		std=0;
+		for (i=0;i<projsize*2;i++)
+		{
+			if(*(Icount+i)>100)
+			{
+				*(Iproj+i)=*(Iproj+i)/(*(Icount+i));
+				size++;
+				sum+=*(Iproj+i);
+			}
+		}
+		avg=sum/size;
+		sum=0;
+		for (i=0;i<projsize*2;i++)
+		{
+			if(*(Icount+i)>100)
+			{
+				sum+=(*(Iproj+i)-avg)*(*(Iproj+i)-avg);
+			}
+		}
+		std=sqrt(sum/size);
+		fprintf(pFile_std,"%f %f\n",size,std);
 	}
+	fclose(pFile_std);
 	int t2=GetTickCount();
 	printf("time difference: %d %f\n",t2-t1,count);
 	free(data_in);
