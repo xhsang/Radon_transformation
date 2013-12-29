@@ -4,12 +4,15 @@
 #include "stdafx.h"
 #include "math.h"
 #include "windows.h"
+#include <Tspectrum.h>
+
 
 #define MSIZE 512
 #define MAX_LEN 100
 
 void get_data_in(float *data_in, int sizex, int sizey)
 {
+	TSpectrum t;
 	int dx,dy;
 	char inputfilename[MAX_LEN]="F://test512.txt";
 	char line[MAX_LEN];
@@ -78,7 +81,10 @@ int _tmain(int argc, _TCHAR* argv[])
 	char outputfilename[MAX_LEN]="F://std.txt";
 	FILE* pFile_std = fopen(outputfilename,"a");
 
-	for(k=0;k<180;k+=0.1)
+
+	int nstd=180;
+	float *istd=(float*)malloc(sizeof(float)*nstd);
+	for(k=0;k<180;k+=1)
 	{
 		float sink,cosk,dist_min;
 		int fx_r;
@@ -136,6 +142,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			}
 		}
 		std=sqrt(sum/size);
+		*(istd+(int)k)=std;
 		fprintf(pFile_std,"%f %f\n",size,std);
 	}
 	fclose(pFile_std);
@@ -148,6 +155,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	free(y_r);
 	free(Iproj);
 	free(Icount);
+	free(istd);
 	return 0;
 }
 
